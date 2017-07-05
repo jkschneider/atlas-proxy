@@ -1,6 +1,6 @@
-package com.netflix.atlas.query.script
+package com.netflix.atlas.proxy.script
 
-import com.netflix.atlas.query.Tag
+import com.netflix.atlas.proxy.Tag
 
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 open class TimeSeriesExpr (q: String): StyleExpr(q) {

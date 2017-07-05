@@ -3,8 +3,11 @@ import java.util.zip.ZipFile
 plugins {
     id 'nebula.kotlin' version '1.1.2'
     id 'org.springframework.boot' version '1.5.4.RELEASE'
+    id 'nebula.release' version '6.0.0'
 }
 
+// Netflix doesn't publish the individual atlas modules in a binary repository, but makes
+// the standalone distribution available as a jar bundled with its dependencies in the root
 def atlasCache = new File(project.buildDir, 'atlas')
 if(!atlasCache.exists()) {
     atlasCache.mkdirs()
@@ -16,6 +19,7 @@ if(!atlasCache.exists()) {
         }
     }
 
+    // break open the standalone jar and extract each of its dependencies
     def standaloneZip = new ZipFile(standalone)
     standaloneZip.entries().each { zipEntry ->
         if(zipEntry.name.endsWith('.jar')) {
@@ -49,3 +53,10 @@ dependencies {
     testCompile 'junit:junit:4.+'
     testCompile 'org.assertj:assertj-core:3.+'
 }
+
+task buildUi(type: Exec) {
+    workingDir = new File(projectDir, '../ui')
+    commandLine './build.sh'
+}
+
+build.dependsOn buildUi

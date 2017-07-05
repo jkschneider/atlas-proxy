@@ -1,3 +1,3 @@
-package com.netflix.atlas.query.script;
+package com.netflix.atlas.proxy.script;
 
 open class Expr(var query: String = "")

@@ -1,11 +1,11 @@
-package com.netflix.atlas.query
+package com.netflix.atlas.proxy
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.netflix.atlas.query.model.AtlasGraph
-import com.netflix.atlas.query.model.TagValues
-import com.netflix.atlas.query.script.Graph
-import com.netflix.atlas.query.script.InvalidTimeSeriesException
-import com.netflix.atlas.query.script.Select
+import com.netflix.atlas.proxy.model.AtlasGraph
+import com.netflix.atlas.proxy.model.TagValues
+import com.netflix.atlas.proxy.script.Graph
+import com.netflix.atlas.proxy.script.InvalidTimeSeriesException
+import com.netflix.atlas.proxy.script.Select
 import groovy.lang.Binding
 import groovy.lang.GroovyShell
 import groovy.transform.CompileStatic
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import javax.servlet.http.HttpServletResponse
 
@@ -46,14 +47,14 @@ class GraphController(val mapper: ObjectMapper,
         // Add some preamble code that binds our script to local Graph and Select instances while
         // still allowing the user-supplied script to be statically compiled.
         val script =
-                "import com.netflix.atlas.query.script.*;" +
-                        "import groovy.transform.CompileStatic;" +
-                        "import groovy.transform.TypeCheckingMode;" +
-                        "@CompileStatic(TypeCheckingMode.SKIP) Graph __graph() { return __graph };" +
-                        "Graph graph = __graph();" +
-                        "@CompileStatic(TypeCheckingMode.SKIP) Select __select() { return __select };" +
-                        "Select select = __select();" +
-                        querySource
+                "import com.netflix.atlas.proxy.script.*;" +
+                "import groovy.transform.CompileStatic;" +
+                "import groovy.transform.TypeCheckingMode;" +
+                "@CompileStatic(TypeCheckingMode.SKIP) Graph __graph() { return __graph };" +
+                "Graph graph = __graph();" +
+                "@CompileStatic(TypeCheckingMode.SKIP) Select __select() { return __select };" +
+                "Select select = __select();" +
+                querySource
 
         try {
             val queryScript = shell.parse(script, "query")
@@ -99,22 +100,27 @@ class GraphController(val mapper: ObjectMapper,
     private fun commonTags(q: String, atlasUri: String): Collection<TagValues> {
         val metrics = metricsInQuery(q)
 
-        // tag names that occur in every metric
-        val commonTags = metrics
-                .map { metricName ->
-                    restTemplate
-                            .getForObject("$atlasUri/api/v1/tags?q=name,{metric},:eq", Array<String>::class.java, metricName)
-                            .toSet()
-                            .minus(arrayOf("name", "statistic"))
-                }
-                .reduce { acc, names -> acc.intersect(names) }
+        try {
+            // tag names that occur in every metric
+            val commonTags = metrics
+                    .map { metricName ->
+                        restTemplate
+                                .getForObject("$atlasUri/api/v1/tags?q=name,{metric},:eq", Array<String>::class.java, metricName)
+                                .toSet()
+                                .minus(arrayOf("name", "statistic"))
+                    }
+                    .reduce { acc, names -> acc.intersect(names) }
 
-        return commonTags.map { tag ->
-            TagValues(tag, metrics.flatMap { metricName ->
-                restTemplate
-                        .getForObject("$atlasUri/api/v1/tags/{tag}?q=name,{metric},:eq", Array<String>::class.java, tag, metricName)
-                        .toList()
-            }.toSet().sorted())
+            return commonTags.map { tag ->
+                TagValues(tag, metrics.flatMap { metricName ->
+                    restTemplate
+                            .getForObject("$atlasUri/api/v1/tags/{tag}?q=name,{metric},:eq", Array<String>::class.java, tag, metricName)
+                            .toList()
+                }.toSet().sorted())
+            }
+        } catch(e: RestClientException) {
+            logger.debug("Unable to retrieve a list of common tags because the Atlas server is unreachable")
+            return emptyList()
         }
     }
 }

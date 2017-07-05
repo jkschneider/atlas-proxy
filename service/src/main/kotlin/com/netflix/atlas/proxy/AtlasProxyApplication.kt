@@ -1,4 +1,4 @@
-package com.netflix.atlas.query
+package com.netflix.atlas.proxy
 
 import com.google.inject.AbstractModule
 import com.netflix.atlas.config.ConfigManager

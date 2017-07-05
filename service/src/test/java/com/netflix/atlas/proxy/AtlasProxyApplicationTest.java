@@ -1,4 +1,4 @@
-package com.netflix.atlas.query;
+package com.netflix.atlas.proxy;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,8 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.junit.Assert.assertTrue;
+
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {"atlas.embedded=false"})
 public class AtlasProxyApplicationTest {
     @Autowired
     TestRestTemplate restTemplate;
@@ -16,10 +19,9 @@ public class AtlasProxyApplicationTest {
     @Test
     public void query() {
         String response = restTemplate.postForObject("/api/graph",
-                "graph.line(timer('playback.startLatency').latency())",
+                "graph.line(select.timer('playback.startLatency').latency())",
                 String.class);
 
-
-        System.out.println(response);
+        assertTrue(response.contains("name,playback.startLatency,:eq"));
     }
 }

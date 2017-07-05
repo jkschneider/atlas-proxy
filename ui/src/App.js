@@ -16,7 +16,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
 
-    const defaultCode = `Timer t = timer('playback.startLatency')\ngraph.line(t.latency())`;
+    const defaultCode = `Timer t = select.timer('playback.startLatency')\ngraph.line(t.latency())`;
     const savedCode = localStorage.getItem('code');
     const savedAtlasUri = localStorage.getItem('atlasUri');
 
@@ -73,11 +73,19 @@ export default class App extends Component {
       <div className="container" style={{marginBottom: 15}}>
         <div className="header clearfix">
             <h3 className="text-muted">Atlas Query Builder</h3>
-            <form className="form-inline">
-              <label className="mr-sm-2" htmlFor="atlasUriSelect">Target Atlas server</label>
+        </div>
+        <div className="form-group row">
+          {/*<label className="col-2 col-form-label">Target Atlas server</label>*/}
+          <div className="col-6">
+            <div className="input-group mb-2 mr-sm-2 mb-sm-0">
+              <div className="input-group-addon">Atlas server</div>
               <input type="text" className="form-control" value={this.state.atlasUri}
+                     placeholder="base URI"
                      id="atlasUriSelect" onChange={e => this.updateUri(e.target.value)}/>
-            </form>
+            </div>
+
+
+          </div>
         </div>
         <div className="row">
           <div className="col col-sm-12">

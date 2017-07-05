@@ -1,4 +1,4 @@
-package com.netflix.atlas.query.script;
+package com.netflix.atlas.proxy.script;
 
 class Graph {
     private val atlasStack = arrayListOf<String>()

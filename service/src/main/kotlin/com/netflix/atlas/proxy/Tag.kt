@@ -1,4 +1,4 @@
-package com.netflix.atlas.query
+package com.netflix.atlas.proxy
 
 data class Tag(val key: String, val value: String) {
     companion object {
