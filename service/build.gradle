@@ -1,0 +1,51 @@
+import java.util.zip.ZipFile
+
+plugins {
+    id 'nebula.kotlin' version '1.1.2'
+    id 'org.springframework.boot' version '1.5.4.RELEASE'
+}
+
+def atlasCache = new File(project.buildDir, 'atlas')
+if(!atlasCache.exists()) {
+    atlasCache.mkdirs()
+
+    def standalone = new File(atlasCache, 'atlas-1.5.3-standalone.jar')
+    if(!standalone.exists()) {
+        standalone.withOutputStream { out ->
+            out << new URL('https://github.com/Netflix/atlas/releases/download/v1.5.3/atlas-1.5.3-standalone.jar').openStream()
+        }
+    }
+
+    def standaloneZip = new ZipFile(standalone)
+    standaloneZip.entries().each { zipEntry ->
+        if(zipEntry.name.endsWith('.jar')) {
+            new File(atlasCache, zipEntry.name).withOutputStream { out ->
+                out << standaloneZip.getInputStream(zipEntry)
+            }
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'org.codehaus.groovy:groovy:2.4+'
+    compile 'org.jetbrains.kotlin:kotlin-reflect'
+
+    compile 'org.slf4j:slf4j-api:1.+'
+    compile 'org.slf4j:log4j-over-slf4j:1.+' // bridges logging in atlas
+
+    // align this version with that used by atlas
+    compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.8.3'
+
+    // we'll have to manually check conflict resolution here
+    compile fileTree(dir: atlasCache.absolutePath, include: '*.jar',
+            excludes: ['atlas-*standalone*.jar', 'log4j*', 'slf4j*'])
+
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile 'junit:junit:4.+'
+    testCompile 'org.assertj:assertj-core:3.+'
+}

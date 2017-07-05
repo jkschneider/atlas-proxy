@@ -1,0 +1,15 @@
+.errors {
+    background-color: #eee;
+}
+
+.errors pre {
+    color: #a11;
+}
+
+.row {
+    margin-top: 15px;
+}
+
+.CodeMirror {
+    border: 1px solid #999;
+}
