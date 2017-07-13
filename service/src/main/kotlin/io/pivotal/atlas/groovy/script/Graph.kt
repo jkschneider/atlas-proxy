@@ -1,4 +1,4 @@
-package com.netflix.atlas.proxy.script;
+package io.pivotal.atlas.groovy.script;
 
 class Graph {
     private val atlasStack = arrayListOf<String>()

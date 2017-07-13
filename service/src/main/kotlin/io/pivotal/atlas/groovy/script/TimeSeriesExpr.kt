@@ -1,6 +1,6 @@
-package com.netflix.atlas.proxy.script
+package io.pivotal.atlas.groovy.script
 
-import com.netflix.atlas.proxy.Tag
+import io.pivotal.atlas.groovy.Tag
 
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 open class TimeSeriesExpr (q: String): StyleExpr(q) {

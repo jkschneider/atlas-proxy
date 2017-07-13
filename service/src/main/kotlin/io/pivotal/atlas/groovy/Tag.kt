@@ -1,4 +1,4 @@
-package com.netflix.atlas.proxy
+package io.pivotal.atlas.groovy
 
 data class Tag(val key: String, val value: String) {
     companion object {

@@ -1,37 +1,12 @@
-import java.util.zip.ZipFile
-
 plugins {
     id 'nebula.kotlin' version '1.1.2'
     id 'org.springframework.boot' version '1.5.4.RELEASE'
     id 'nebula.release' version '6.0.0'
 }
 
-// Netflix doesn't publish the individual atlas modules in a binary repository, but makes
-// the standalone distribution available as a jar bundled with its dependencies in the root
-def atlasCache = new File(project.buildDir, 'atlas')
-if(!atlasCache.exists()) {
-    atlasCache.mkdirs()
-
-    def standalone = new File(atlasCache, 'atlas-1.5.3-standalone.jar')
-    if(!standalone.exists()) {
-        standalone.withOutputStream { out ->
-            out << new URL('https://github.com/Netflix/atlas/releases/download/v1.5.3/atlas-1.5.3-standalone.jar').openStream()
-        }
-    }
-
-    // break open the standalone jar and extract each of its dependencies
-    def standaloneZip = new ZipFile(standalone)
-    standaloneZip.entries().each { zipEntry ->
-        if(zipEntry.name.endsWith('.jar')) {
-            new File(atlasCache, zipEntry.name).withOutputStream { out ->
-                out << standaloneZip.getInputStream(zipEntry)
-            }
-        }
-    }
-}
-
 repositories {
     mavenCentral()
+    maven { url 'https://dl.bintray.com/netflixoss/maven/' }
 }
 
 dependencies {
@@ -43,11 +18,12 @@ dependencies {
     compile 'org.slf4j:log4j-over-slf4j:1.+' // bridges logging in atlas
 
     // align this version with that used by atlas
-    compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.8.3'
+    compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.8.6'
 
-    // we'll have to manually check conflict resolution here
-    compile fileTree(dir: atlasCache.absolutePath, include: '*.jar',
-            excludes: ['atlas-*standalone*.jar', 'log4j*', 'slf4j*'])
+    compile 'com.netflix.atlas_v1:atlas-module-akka_2.12:1.6.0-rc.4'
+    compile 'com.netflix.atlas_v1:atlas-module-lwcapi_2.12:1.6.0-rc.4'
+    compile 'com.netflix.atlas_v1:atlas-module-webapi_2.12:1.6.0-rc.4'
+    compile 'com.netflix.spectator:spectator-api:0.55.0'
 
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'junit:junit:4.+'

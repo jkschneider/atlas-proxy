@@ -1,11 +1,11 @@
-package com.netflix.atlas.proxy
+package io.pivotal.atlas.groovy
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.netflix.atlas.proxy.model.AtlasGraph
-import com.netflix.atlas.proxy.model.TagValues
-import com.netflix.atlas.proxy.script.Graph
-import com.netflix.atlas.proxy.script.InvalidTimeSeriesException
-import com.netflix.atlas.proxy.script.Select
+import io.pivotal.atlas.groovy.model.AtlasGraph
+import io.pivotal.atlas.groovy.model.TagValues
+import io.pivotal.atlas.groovy.script.Graph
+import io.pivotal.atlas.groovy.script.InvalidTimeSeriesException
+import io.pivotal.atlas.groovy.script.Select
 import groovy.lang.Binding
 import groovy.lang.GroovyShell
 import groovy.transform.CompileStatic

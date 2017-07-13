@@ -1,6 +1,6 @@
-package com.netflix.atlas.proxy.script
+package io.pivotal.atlas.groovy.script
 
-import com.netflix.atlas.proxy.Tag
+import io.pivotal.atlas.groovy.Tag
 import org.slf4j.LoggerFactory
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate

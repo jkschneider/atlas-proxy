@@ -1,9 +1,9 @@
-package com.netflix.atlas.proxy.script
+package io.pivotal.atlas.groovy.script
 
-import com.netflix.atlas.proxy.Tag
+import io.pivotal.atlas.groovy.Tag
 
 class Timer(q: String): TimeSeriesExpr(q) {
-    constructor(name: String, tags: Collection<Tag>): this(TimeSeriesExpr.build(name, tags))
+    constructor(name: String, tags: Collection<Tag>): this(build(name, tags))
 
     fun distAvg(): TimeSeriesExpr {
         return Timer("$query,:dist-avg")

@@ -1,4 +1,4 @@
-package com.netflix.atlas.proxy.script
+package io.pivotal.atlas.groovy.script
 
 open class StyleExpr(q: String): Expr(q) {
     fun lineWidth(n: Number): StyleExpr {

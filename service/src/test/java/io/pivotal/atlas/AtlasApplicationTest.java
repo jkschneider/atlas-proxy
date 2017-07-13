@@ -1,4 +1,4 @@
-package com.netflix.atlas.proxy;
+package io.pivotal.atlas;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {"atlas.embedded=false"})
-public class AtlasProxyApplicationTest {
+public class AtlasApplicationTest {
     @Autowired
     TestRestTemplate restTemplate;
 

@@ -1,4 +1,4 @@
-package com.netflix.atlas.proxy
+package io.pivotal.atlas
 
 import com.google.inject.AbstractModule
 import com.netflix.atlas.config.ConfigManager
@@ -9,59 +9,20 @@ import com.netflix.spectator.api.Spectator
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.SpringApplication
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.web.support.SpringBootServletInitializer
-import org.springframework.context.annotation.Bean
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.servlet.config.annotation.CorsRegistry
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
+import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 import java.io.File
-import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 
-/**
- * @author Jon Schneider
- */
-@SpringBootApplication
-open class AtlasProxyApplication : SpringBootServletInitializer() {
-    private val log = LoggerFactory.getLogger(AtlasProxyApplication::class.java)
-
-    companion object {
-        @JvmStatic
-        fun main(args: Array<String>) {
-            SpringApplication.run(AtlasProxyApplication::class.java)
-        }
-    }
-
-    /**
-     * Needed in development when running the UI independently of the service
-     */
-    @Bean
-    open fun corsConfigurer(): WebMvcConfigurer = object : WebMvcConfigurerAdapter() {
-        override fun addCorsMappings(registry: CorsRegistry) {
-            registry.addMapping("/api/**")
-        }
-    }
-
-    @Bean
-    open fun restTemplate() = RestTemplate()
-
-    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-    @Value("\${atlas.embedded:true}")
-    private lateinit var atlasEmbedded: java.lang.Boolean
+@Configuration
+open class AtlasConfiguration(env: Environment) {
+    private val log = LoggerFactory.getLogger(AtlasConfiguration::class.java)
     private val guice = GuiceHelper()
 
     /**
      * Almost identical logic is found in atlas-standalone
      */
-    @PostConstruct
-    fun startEmbeddedAtlasIfNecessary() {
-        if(!atlasEmbedded.booleanValue())
-            return
-
+    init {
         // Start an embedded Atlas server at a port governed by the provided Atlas config, or 7101 by default
         try {
             fun loadAdditionalConfigFiles(files: Array<String>) {
@@ -76,8 +37,8 @@ open class AtlasProxyApplication : SpringBootServletInitializer() {
                 }
             }
 
-            // if (args.nonEmpty) args else Array("static.conf")
-            loadAdditionalConfigFiles(arrayOf("static.conf"))
+            val conf = if (env.acceptsProfiles("demo")) "static.conf" else "memory.conf"
+            loadAdditionalConfigFiles(arrayOf(conf))
 
             val modules = GuiceHelper.getModulesUsingServiceLoader()
 
