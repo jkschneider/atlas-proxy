@@ -47,7 +47,7 @@ class GraphController(val mapper: ObjectMapper,
         // Add some preamble code that binds our script to local Graph and Select instances while
         // still allowing the user-supplied script to be statically compiled.
         val script =
-                "import com.netflix.atlas.proxy.script.*;" +
+                "import io.pivotal.atlas.groovy.script.*;" +
                 "import groovy.transform.CompileStatic;" +
                 "import groovy.transform.TypeCheckingMode;" +
                 "@CompileStatic(TypeCheckingMode.SKIP) Graph __graph() { return __graph };" +
