@@ -11,7 +11,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {"atlas.embedded=false"})
+        properties = {"atlas.embedded=true", "spring.profiles.active=demo"})
 public class AtlasApplicationTest {
     @Autowired
     TestRestTemplate restTemplate;
