@@ -48,7 +48,7 @@ graph.axisLabel(1, 'Throughput (requests/second)')`;
   }
 
   graph() {
-    fetch(`${this.state.atlasUri}/api/graph?width=${this.graphViewport.clientWidth}`, {
+    fetch(`${this.state.atlasUri}/api/graph?width=${this.graphViewport.clientWidth}&atlasUri=${encodeURIComponent(this.state.atlasUri)}`, {
       method: 'POST',
       body: this.state.code
     }).then(response => {

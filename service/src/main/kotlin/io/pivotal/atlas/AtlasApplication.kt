@@ -12,6 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -43,11 +44,25 @@ open class AtlasApplication : SpringBootServletInitializer() {
 }
 
 @Controller
-class ExceptionHandlingController {
+class AtlasProxy {
     @RequestMapping("/api/v1/**")
     fun proxyAtlas(req: HttpServletRequest, resp: HttpServletResponse) {
-        val url = URL("http://localhost:7101${req.requestURI}")
-        val connection = url.openConnection() as HttpURLConnection
+        println("Proxying: ${req.requestURI}")
+
+        var queryParams = req.parameterNames.toList().map { param ->
+            val value = when(param) {
+                "q", "tz" -> req.getParameter(param)
+                else -> URLEncoder.encode(req.getParameter(param), "UTF-8")
+            }
+            "$param=$value"
+        }.joinToString("&")
+
+        if(queryParams.isNotEmpty())
+            queryParams = "?$queryParams"
+
+        val url = "http://localhost:7101${req.requestURI}$queryParams"
+        println("Proxing response from: " + url)
+        val connection = URL(url).openConnection() as HttpURLConnection
         req.headerNames.toList().forEach { h ->
             connection.setRequestProperty(h, req.getHeader(h))
         }
@@ -71,6 +86,5 @@ class ExceptionHandlingController {
         }
 
         resp.status = responseCode
-        println(req.toString())
     }
 }
