@@ -13,7 +13,7 @@ class Select(private val atlasUri: String) {
 
     fun timer(name: String, vararg tags: String): Timer {
         try {
-            val resp = URL("$atlasUri/api/v1/tags/statistic?q=name,playback.startLatency,:eq").openStream().reader().readText()
+            val resp = URL("$atlasUri/api/v1/tags/statistic?q=name,$name,:eq").openStream().reader().readText()
             val stats = mapper.readValue(resp, Array<String>::class.java)
             if (!stats.contains("count") || !stats.contains("totalTime")) {
                 throw InvalidTimeSeriesException(name, "'$name' is not a timer")
