@@ -38,7 +38,7 @@ class GraphController(val mapper: ObjectMapper,
 
         val binding = Binding()
         binding.setProperty("__graph", graph)
-        binding.setProperty("__select", Select(atlasUri, restTemplate))
+        binding.setProperty("__select", Select(atlasUri))
 
         // see http://groovy-lang.org/integrating.html for more about GroovyShell and alternatives
         val shell = GroovyShell(javaClass.classLoader, binding, CompilerConfiguration()
