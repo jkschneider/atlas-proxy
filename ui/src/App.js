@@ -10,19 +10,26 @@ import 'codemirror/theme/eclipse.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import AtlasGraph from './AtlasGraph';
-import {proxy} from './proxy.js';
 
 export default class App extends Component {
   constructor(props) {
     super(props);
 
-    const defaultCode = `Timer t = select.timer('playback.startLatency')\ngraph.line(t.latency())`;
+    const defaultCode =
+`Timer t = select.timer('playback.startLatency')
+graph.line(t.latency().axis(0).lineWidth(2))
+graph.line(t.throughput().axis(1))
+
+graph.title('Playback Start Latency')
+graph.axisLabel(0, 'Latency (seconds)')
+graph.axisLabel(1, 'Throughput (requests/second)')`;
+
     const savedCode = localStorage.getItem('code');
     const savedAtlasUri = localStorage.getItem('atlasUri');
 
     this.state = {
       code: savedCode ? savedCode : defaultCode,
-      atlasUri: savedAtlasUri ? savedAtlasUri : 'http://localhost:7101'
+      atlasUri: savedAtlasUri ? savedAtlasUri : 'http://jon-atlas-cf.cfapps.io'
     };
 
     this.graph = this.graph.bind(this);
@@ -41,7 +48,7 @@ export default class App extends Component {
   }
 
   graph() {
-    fetch(`${proxy}/api/graph?width=${this.graphViewport.clientWidth}`, {
+    fetch(`${this.state.atlasUri}/api/graph?width=${this.graphViewport.clientWidth}`, {
       method: 'POST',
       body: this.state.code
     }).then(response => {

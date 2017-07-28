@@ -5,20 +5,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.web.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
-import javax.annotation.PostConstruct
+import java.net.HttpURLConnection
+import java.net.URL
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import javax.servlet.ServletRegistration
-import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer
-import java.net.HttpURLConnection
-import java.net.URI
-import java.net.URL
 
 
 /**
@@ -50,20 +45,30 @@ open class AtlasApplication : SpringBootServletInitializer() {
 @Controller
 class ExceptionHandlingController {
     @RequestMapping("/api/v1/**")
-    fun handle404(req: HttpServletRequest, resp: HttpServletResponse) {
+    fun proxyAtlas(req: HttpServletRequest, resp: HttpServletResponse) {
         val url = URL("http://localhost:7101${req.requestURI}")
         val connection = url.openConnection() as HttpURLConnection
-        req.headerNames.toList().forEach { header ->
-            connection.setRequestProperty(header, req.getHeader(header))
+        req.headerNames.toList().forEach { h ->
+            connection.setRequestProperty(h, req.getHeader(h))
         }
         connection.requestMethod = req.method
-        connection.doOutput = true
-        req.inputStream.copyTo(connection.outputStream)
+        if(req.method == "POST") {
+            connection.doOutput = true
+            req.inputStream.copyTo(connection.outputStream)
+        }
         connection.connect()
 
         val responseCode = connection.responseCode
         if(responseCode == 200)
             connection.inputStream.copyTo(resp.outputStream)
+
+        connection.headerFields.toList().forEach { h ->
+            for (v in h.second) {
+                if(v != "chunked") { // don't want to deal with this complexity, we've just streamed the whole input stream to the response
+                    resp.addHeader(h.first, v)
+                }
+            }
+        }
 
         resp.status = responseCode
         println(req.toString())
