@@ -9,13 +9,13 @@ import com.netflix.spectator.api.Spectator
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.env.Environment
 import java.io.File
 import javax.annotation.PreDestroy
 
 @Configuration
-open class AtlasConfiguration(env: Environment) {
+open class AtlasConfiguration(@Value("\${atlas.db}") db: String) {
     private val log = LoggerFactory.getLogger(AtlasConfiguration::class.java)
     private val guice = GuiceHelper()
 
@@ -37,7 +37,7 @@ open class AtlasConfiguration(env: Environment) {
                 }
             }
 
-            val conf = if (env.acceptsProfiles("demo")) "static.conf" else "memory.conf"
+            val conf = if (db == "static") "static.conf" else "memory.conf"
             loadAdditionalConfigFiles(arrayOf(conf))
 
             val modules = GuiceHelper.getModulesUsingServiceLoader()
