@@ -35,5 +35,5 @@ task buildUi(type: Exec) {
     commandLine './build.sh'
 }
 
-//build.dependsOn buildUi
+build.dependsOn buildUi
 test.dependsOn compileKotlin
