@@ -29,7 +29,7 @@ graph.axisLabel(1, 'Throughput (requests/second)')`;
 
     this.state = {
       code: savedCode ? savedCode : defaultCode,
-      atlasUri: savedAtlasUri ? savedAtlasUri : 'http://jon-atlas-cf.cfapps.io'
+      atlasUri: savedAtlasUri ? savedAtlasUri : 'https://jon-atlas-cf.cfapps.io'
     };
 
     this.graph = this.graph.bind(this);
